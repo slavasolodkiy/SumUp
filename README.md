@@ -212,19 +212,23 @@ The onboarding step engine is driven entirely from `docs/onboarding/question-tre
 pnpm --filter @workspace/api-server run test
 ```
 
-Tests run against the live `DATABASE_URL`. CI runs the same suite with a dedicated Postgres service container.
+Tests run against the live `DATABASE_URL`.
 
 ---
 
-## CI
+## Quality Gate (Replit / Linux)
 
-GitHub Actions workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+No GitHub Actions CI. Run the full local quality gate on Replit or any Linux x64 machine:
 
-Runs on every push and PR to `main`:
-1. TypeScript typecheck (all packages)
-2. API integration tests (with Postgres service)
+```bash
+pnpm run verify:replit
+```
+
+This runs in order:
+1. Policy guard — confirms no GitHub Actions CI workflow exists or is referenced in docs
+2. TypeScript typecheck (all packages)
 3. API server build
-4. Web app build (with `BASE_PATH=/` placeholder)
+4. API integration tests (28 tests, requires `DATABASE_URL`)
 
 ---
 

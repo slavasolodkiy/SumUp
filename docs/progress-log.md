@@ -99,49 +99,57 @@
 - [2026-04-09] Phase 1 — Docs/Reality Alignment: README fixed (migrate→push, seed commands, docker note, onboarding paths, build constraints)
 - [2026-04-09] Phase 2 — Dev UX: `lib/db` gained `migrate` alias for `drizzle-kit push`; real `seed` script in `scripts/src/seed.ts` (idempotent, creates 1 merchant + 5 products + 30 transactions + 3 payouts)
 - [2026-04-09] Phase 3 — Docker Compose: `artifacts/api-server/Dockerfile.dev` + `artifacts/web-app/Dockerfile.dev` created; `docker compose config` validates cleanly; `version:` obsolete field removed
-- [2026-04-09] Phase 4 — CI: `.github/workflows/ci.yml` created — **NOTE: removed in a subsequent commit and must be restored**
+- [2026-04-09] Phase 4 — CI: a GitHub Actions workflow was created (later permanently removed — see v1.4 policy: no GitHub Actions CI)
 - [2026-04-09] Phase 5 — Onboarding Integrity: Step engine replaced with tree-based resolver from question-tree.json; `step_id !== current_step` → 409 StepConflict enforced; required field validation (422 on missing fields); 8 tests covering out-of-order, re-submit, skip-ahead, individual/company/sole_trader branch divergence
 - [2026-04-09] Phase 6 — Verification: typecheck ✅ (4/4 clean), tests ✅ (25/25), api-server build ✅, docker compose config ✅, seed ✅
 
-### Phase v1.2: Cross-Platform + CI Restoration ✅
-
-Verified state at start of v1.2:
-- `.github/workflows/ci.yml` — MISSING (removed in prior commit) → RESTORED
-- `docs/progress-log.md` — stale mobile claims → CORRECTED
-- `docs/architecture/architecture-diagram.md` — claimed microservices, included mobile → CORRECTED (modular-monolith, mobile marked deferred)
-- `package.json preinstall` — used `sh` (broken on Windows) → REPLACED with Node.js script
+### Phase v1.2: Cross-Platform + Quality Improvements ✅
 
 - [2026-04-09] Phase 1 — Docs truth restored: progress-log.md Phase 3/5 mobile claims corrected; architecture-diagram.md updated to modular-monolith pattern; mobile removed from diagram (marked DEFERRED)
-- [2026-04-09] Phase 2 — CI restored: `.github/workflows/ci.yml` re-created with 5 jobs (install, typecheck, test+postgres, build-api, build-web with BASE_PATH placeholder)
+- [2026-04-09] Phase 2 — A GitHub Actions workflow was created during this phase (later permanently removed in v1.4 — not present in HEAD)
 - [2026-04-09] Phase 3 — Cross-platform: `preinstall` now uses `scripts/check-package-manager.mjs` (Node.js, works on Linux/macOS/Windows); rollup/esbuild overrides documented as Linux x64 only in README
 - [2026-04-09] Phase 4 — Onboarding polish: added 422 required-field tests (2 new tests → 27 total); fixed DK bank_format in country-language-matrix.csv (added local Reg+Kontonummer note); README test count corrected to 27
 - [2026-04-09] Verification: typecheck ✅ (4/4 clean), tests ✅ (27/27)
 
 ---
 
-## CI Status Guard
-
-**Rule:** The entry "CI workflow exists" may only appear in this log when `.github/workflows/ci.yml` exists in HEAD.
-Current state: `.github/workflows/ci.yml` — **EXISTS** (restored in v1.2)
-
 ### Phase v1.3: Zero Truth Gaps + Cross-Platform Fix ✅
 
-Verified baseline at v1.3 start:
-- `.github/workflows/ci.yml` — MISSING in HEAD (removed by checkpoint after v1.2) → RESTORED
-- `replit.md` — claimed 21 tests (stale), 25 tests (stale), CI reference with no file → CORRECTED
-- `README.md` — claimed "27 countries" for CSV that has 26 rows → CORRECTED
-- `scripts/check-package-manager.mjs` — used `new URL(...).pathname` (Windows-broken) → FIXED
-- DK entry in `COUNTRIES` array had `bank_format: "Finanstilsynet"` (regulatory body, not format) → FIXED
-
-Changes:
-- [2026-04-09] Phase 1 — `.github/workflows/ci.yml` restored (215 lines, 5 jobs)
+- [2026-04-09] Phase 1 — A GitHub Actions workflow was transiently restored then permanently removed in v1.4
 - [2026-04-09] Phase 2 — `scripts/check-package-manager.mjs`: replaced URL pathname with `fileURLToPath(import.meta.url)` + `dirname()` (cross-platform Node.js path resolution)
 - [2026-04-09] Phase 3 — DK COUNTRIES entry fixed: `bank_format: "IBAN+BIC|Reg+Kontonummer (local)"`, `regulatory_framework: "Finanstilsynet"` (separated previously conflated values); country count documented as 20 runtime / 26 CSV; DK integrity test added
 - [2026-04-09] Phase 4 — All stale test counts corrected to 28 (verified); CSV country count corrected to 26 (verified)
 
-Verified outputs:
+Verified outputs (v1.3, Linux x64 / Replit):
 - `pnpm run typecheck` → 4/4 packages clean
 - `pnpm --filter @workspace/api-server run test` → 28/28 pass
-- `pnpm --filter @workspace/api-server run build` → ⚡ Done in 1238ms
-- `BASE_PATH=/ PORT=5173 pnpm --filter @workspace/web-app run build` → ✓ built in 8.27s
-- `.github/workflows/ci.yml` exists in HEAD: YES (215 lines)
+- `pnpm --filter @workspace/api-server run build` → ⚡ Done in ~1.2s
+
+### Phase v1.4: No-CI Truthful State ✅
+
+**Policy (permanent):** This repository has no GitHub Actions CI. The quality gate runs locally via `pnpm run verify:replit` on Replit / Linux x64.
+
+State at v1.4 start:
+- GitHub Actions workflow file — ABSENT (correct per policy)
+- README.md — still referenced it → REMOVED; CI section replaced with Quality Gate section
+- replit.md — still referenced it → REMOVED
+- docs/progress-log.md — multiple historical references → CORRECTED to use neutral wording
+
+Changes:
+- [2026-04-09] Phase 1 — All GitHub Actions workflow references removed from README.md, replit.md, docs/progress-log.md; CI section replaced with "Quality Gate (Replit / Linux)" in README.md
+- [2026-04-09] Phase 2 — `scripts/check-no-github-ci.mjs` created: fails if the workflow file exists OR if tracked docs reference it; `verify:policy` and `verify:replit` scripts added to package.json
+- [2026-04-09] Phase 3 — Counts confirmed consistent: 20 runtime countries, 26 CSV countries, 28 tests
+
+Verified outputs (Linux x64 / Replit):
+- `pnpm run verify:policy` → ✅ all checks pass
+- `pnpm run typecheck` → 4/4 packages clean
+- `pnpm --filter @workspace/api-server run test` → 28/28 pass
+- `pnpm --filter @workspace/api-server run build` → ⚡ Done
+
+Current HEAD truth table:
+- GitHub Actions workflow file exists: **NO**
+- Any doc references the workflow file path: **NO**
+- Runtime country count: **20**
+- CSV country count: **26**
+- Test count: **28**
+- Supported environment: **Linux x64 only** (pnpm-workspace.yaml excludes all other platform binaries)

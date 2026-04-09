@@ -6,7 +6,9 @@
     "preinstall": "node scripts/check-package-manager.mjs",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
+    "verify:policy": "node scripts/check-no-github-ci.mjs",
+    "verify:replit": "pnpm run verify:policy && pnpm run typecheck && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/api-server run test"
   },
   "private": true,
   "devDependencies": {

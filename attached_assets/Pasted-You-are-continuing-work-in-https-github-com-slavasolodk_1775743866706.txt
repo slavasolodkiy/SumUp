@@ -1,0 +1,54 @@
+You are continuing work in https://github.com/slavasolodkiy/SumUp on branch main.
+
+IMPORTANT PROJECT POLICY (must follow):
+- DO NOT create or restore `.github/workflows/ci.yml`.
+- Repository intentionally has NO GitHub Actions workflow.
+- Any documentation claiming CI workflow exists is considered a truth-gap bug.
+
+Goal: ship v1.4 “No-CI Truthful State”.
+
+Tasks (in order):
+
+Phase 1 — Remove CI truth gaps
+1) Remove/replace all references to `.github/workflows/ci.yml` in:
+   - README.md
+   - replit.md
+   - docs/progress-log.md
+2) Replace CI sections with “Replit/Linux manual quality gate” wording.
+3) In progress-log, keep historical notes but add a final authoritative entry:
+   - current policy = no GitHub Actions CI
+   - current HEAD = no `.github/workflows/ci.yml`
+
+Phase 2 — Add repo policy guard (prevent regressions)
+1) Add `scripts/check-no-github-ci.mjs` that fails if:
+   - `.github/workflows/ci.yml` exists
+   - README/replit/progress-log contains `.github/workflows/ci.yml`
+2) Add npm scripts:
+   - `verify:policy` -> run this guard
+   - `verify:replit` -> `pnpm run verify:policy && pnpm run typecheck && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/api-server run test`
+3) Keep existing Linux-only constraints explicit (don’t pretend Windows test/build parity).
+
+Phase 3 — Documentation consistency pass
+1) Ensure counts are consistent everywhere:
+   - runtime countries = 20
+   - research CSV countries = 26
+   - tests = 28 (or update if changed)
+2) Ensure DK entry explanation remains consistent with API payload and tests.
+
+Verification (must include outputs):
+- pnpm run verify:policy
+- pnpm run typecheck
+- pnpm --filter @workspace/api-server run build
+- pnpm --filter @workspace/api-server run test
+- If a command is not runnable in environment, mark as NOT RUN and explain why.
+
+Deliverables:
+1) Files changed
+2) Exact commands + outputs
+3) Final truth table:
+   - `.github/workflows/ci.yml` exists? (must be NO)
+   - Any docs mention `.github/workflows/ci.yml`? (must be NO)
+   - runtime countries count
+   - CSV countries count
+   - tests count
+4) Commit hashes and push confirmation

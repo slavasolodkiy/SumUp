@@ -94,7 +94,7 @@ JWT-based: access + refresh tokens (both include `jti` for uniqueness). Stored i
 - Integration tests: `pnpm --filter @workspace/api-server run test`
 - **28 tests** across 3 suites: auth, payments, onboarding
 - Vitest + Supertest; runs against live DATABASE_URL
-- CI: `.github/workflows/ci.yml` — 5 jobs: install, typecheck, test (Postgres service), build-api, build-web
+- No GitHub Actions CI — quality gate runs locally via `pnpm run verify:replit`
 
 ## Mobile App
 
@@ -115,6 +115,8 @@ NOT YET IMPLEMENTED. See `docs/architecture/mobile-plan.md` for planned Expo des
 
 ## Key Commands
 
+- `pnpm run verify:policy` — policy guard: confirms no GitHub Actions CI workflow file or doc references exist
+- `pnpm run verify:replit` — full local quality gate: policy + typecheck + api build + api tests (Linux x64 / Replit)
 - `pnpm run typecheck` — full typecheck across all packages (4/4 clean)
 - `pnpm --filter @workspace/api-server run build` — build API server (web-app builds at Replit deploy time)
 - `pnpm --filter @workspace/api-server run test` — run 28 integration tests (auth + payments + onboarding)
