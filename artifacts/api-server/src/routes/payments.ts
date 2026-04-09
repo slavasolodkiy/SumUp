@@ -69,8 +69,9 @@ router.post("/payments/transactions", requireAuth, async (req, res) => {
 });
 
 router.get("/payments/transactions/:transactionId", requireAuth, async (req, res) => {
+  const txId = String(req.params["transactionId"]);
   const [tx] = await db.select().from(transactionsTable)
-    .where(and(eq(transactionsTable.id, req.params["transactionId"]!), eq(transactionsTable.merchantId, req.merchantId!)))
+    .where(and(eq(transactionsTable.id, txId), eq(transactionsTable.merchantId, req.merchantId!)))
     .limit(1);
 
   if (!tx) {
@@ -81,8 +82,9 @@ router.get("/payments/transactions/:transactionId", requireAuth, async (req, res
 });
 
 router.post("/payments/transactions/:transactionId/refund", requireAuth, async (req, res) => {
+  const txId = String(req.params["transactionId"]);
   const [tx] = await db.select().from(transactionsTable)
-    .where(and(eq(transactionsTable.id, req.params["transactionId"]!), eq(transactionsTable.merchantId, req.merchantId!)))
+    .where(and(eq(transactionsTable.id, txId), eq(transactionsTable.merchantId, req.merchantId!)))
     .limit(1);
 
   if (!tx) {

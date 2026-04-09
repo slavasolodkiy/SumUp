@@ -83,3 +83,12 @@
 8. Build multi-language onboarding question tree resolution
 9. Add advanced analytics dashboard (cohort analysis, funnel metrics)
 10. Implement real Bluetooth SDK for card reader pairing (native modules)
+
+### Phase A–F: Multi-Phase Hardening Plan ✅
+
+- [2026-04-09] Phase A — README.md, docker-compose.yml, .env.example created
+- [2026-04-09] Phase B — TypeScript errors fixed: `req.params["transactionId"]` (payments.ts), `req.params["productId"]` (products.ts×3), refund mutation `data: {}` (transactions.tsx). `pnpm run typecheck` clean.
+- [2026-04-09] Phase C — `GET /api/onboarding/question-tree` now loads from `docs/onboarding/question-tree.json` (single source of truth, cached in-memory)
+- [2026-04-09] Phase D — Auth hardening: JWT `jti` for uniqueness; refresh token validated against DB-stored copy; token rotation attack prevention (reuse returns 401); auth rate limiter (20 req/15min, skipped in test); body size limit 1MB; `SESSION_SECRET` startup crash guard in production
+- [2026-04-09] Phase E — Vitest integration tests: 21 tests across auth/payments/onboarding suites. CI YAML at .github/workflows/ci.yml. All 21 tests pass.
+- [2026-04-09] Phase F — Mobile app explicitly deferred (NOT IMPLEMENTED). Design doc at docs/architecture/mobile-plan.md.

@@ -6,13 +6,13 @@ SumUp-inspired multi-platform payments reference system built as a pnpm workspac
 
 ## Architecture
 
-- **`artifacts/api-server`** — Express 5 backend, port 8080, serves all `/api/*` routes
-- **`artifacts/web-app`** — React + Vite merchant dashboard, proxied at `/`
+- **`artifacts/api-server`** — Express 5 backend, serves all `/api/*` routes
+- **`artifacts/web-app`** — React + Vite merchant dashboard
 - **`lib/api-spec`** — OpenAPI spec (openapi.yaml), codegen source of truth
 - **`lib/api-client-react`** — Orval-generated TanStack Query hooks + custom fetcher
 - **`lib/api-zod`** — Orval-generated Zod validation schemas
 - **`lib/db`** — Drizzle ORM schema + client (PostgreSQL)
-- **`docs/`** — Research docs (web/iOS/Android analysis, question trees, country matrix)
+- **`docs/`** — Research docs, onboarding question tree, country matrix
 
 ## Demo Credentials
 
@@ -24,17 +24,18 @@ Email: `demo@payos.com` / Password: `Demo1234!`
 |-------|-------------|
 | POST /api/auth/register | Create merchant + issue JWT |
 | POST /api/auth/login | Login, issue access + refresh tokens |
-| POST /api/auth/refresh | Refresh access token |
+| POST /api/auth/refresh | Rotate refresh token pair |
 | POST /api/auth/logout | Revoke tokens |
 | GET /api/merchants/me | Get authenticated merchant |
 | PUT /api/merchants/me | Update merchant profile |
-| GET /api/merchants/me/summary | Dashboard stats (today/week/month volume, top products, recent txs) |
+| GET /api/merchants/me/summary | Dashboard stats |
 | GET/POST /api/onboarding/session | Get or create onboarding session |
-| POST /api/onboarding/session/step | Submit one onboarding answer, returns next question |
+| POST /api/onboarding/session/step | Submit one onboarding answer (body: `step_id`, `answer`) |
 | POST /api/onboarding/session/kyc/verify | Simulate KYC verification |
 | GET /api/onboarding/countries | 20 supported countries |
+| GET /api/onboarding/question-tree | Full branching question tree (loaded from docs/onboarding/question-tree.json) |
 | GET /api/payments/transactions | List transactions (paginated, filterable) |
-| POST /api/payments/transactions | Create transaction |
+| POST /api/payments/transactions | Create transaction (requires `payment_method` field) |
 | GET /api/payments/transactions/:id | Get single transaction |
 | POST /api/payments/transactions/:id/refund | Refund transaction |
 | POST /api/payments/checkouts | Create payment link |
@@ -44,11 +45,10 @@ Email: `demo@payos.com` / Password: `Demo1234!`
 | GET /api/products | List products |
 | POST /api/products | Create product |
 | GET/PUT/DELETE /api/products/:id | Manage product |
-| GET /api/products/categories | List product categories |
 
 ## Database Tables
 
-- `merchants` — id, email, password_hash, first_name, last_name, business_name, business_category, country, status, onboarding_status
+- `merchants` — id, email, password_hash, first_name, last_name, business_name, business_category, country, status, onboarding_status, refresh_token
 - `onboarding_sessions` — id, merchant_id, current_step, status, answers (JSONB), progress_percent, kyc_session_id, kyc_status
 - `transactions` — id, merchant_id, amount, currency, status, payment_method, card_last_four, card_scheme, product_id, product_name, description
 - `products` — id, merchant_id, name, price, currency, category, sku, active, image_url
@@ -69,7 +69,34 @@ Email: `demo@payos.com` / Password: `Demo1234!`
 
 ## Auth Pattern
 
-JWT-based: access token (1h) + refresh token (30d) stored in localStorage. Custom fetcher (`lib/api-client-react/src/custom-fetch.ts`) uses `setAuthTokenGetter()` to attach Bearer tokens. Auto-refresh on 401.
+JWT-based: access + refresh tokens (both include `jti` for uniqueness). Stored in localStorage. Refresh tokens stored in DB — validated on each rotation; reusing a rotated token returns 401 (token rotation security). Custom fetcher (`lib/api-client-react/src/custom-fetch.ts`) uses `setAuthTokenGetter()` to attach Bearer tokens. Auto-refresh on 401.
+
+## Security Hardening (Phase D)
+
+- JWT tokens include `jti` (unique ID per token) to prevent same-second collisions
+- Refresh token verified against DB-stored copy on each rotation (prevents token reuse after rotation)
+- Auth endpoints rate-limited: 20 requests per 15 min per IP (skipped in test mode)
+- `SESSION_SECRET` required in production — server crashes on startup if missing
+- Request body size limited to 1MB
+- Passwords hashed with bcrypt (cost factor 12)
+
+## Onboarding (Phase C - SOT)
+
+- `docs/onboarding/question-tree.json` is the single source of truth for all onboarding questions
+- `GET /api/onboarding/question-tree` serves this file directly (cached in-memory)
+- Individual vs company branching logic in `artifacts/api-server/src/routes/onboarding.ts`
+- 20 countries, 5 entity types (individual, sole_trader, registered_company, partnership, charity)
+
+## Testing (Phase E)
+
+- Integration tests: `pnpm --filter @workspace/api-server run test`
+- 21 tests across 3 suites: auth, payments, onboarding
+- Vitest + Supertest; runs against live DATABASE_URL
+- CI: `.github/workflows/ci.yml` (typecheck + test on push/PR)
+
+## Mobile App
+
+NOT YET IMPLEMENTED. See `docs/architecture/mobile-plan.md` for planned Expo design.
 
 ## Stack
 
@@ -82,11 +109,13 @@ JWT-based: access token (1h) + refresh token (30d) stored in localStorage. Custo
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Testing**: Vitest + Supertest
 
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
+- `pnpm --filter @workspace/api-server run test` — run 21 integration tests
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally

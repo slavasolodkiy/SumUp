@@ -4,6 +4,23 @@ import { onboardingSessionsTable, merchantsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth.js";
 import { SubmitOnboardingStepBody, SubmitKycVerificationBody } from "@workspace/api-zod";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const _dir = dirname(fileURLToPath(import.meta.url));
+const QUESTION_TREE_PATH = resolve(_dir, "../../../../docs/onboarding/question-tree.json");
+let _questionTreeCache: unknown = null;
+
+function getQuestionTree(): unknown {
+  if (_questionTreeCache) return _questionTreeCache;
+  try {
+    _questionTreeCache = JSON.parse(readFileSync(QUESTION_TREE_PATH, "utf-8"));
+  } catch {
+    _questionTreeCache = { error: "question-tree.json not found", path: QUESTION_TREE_PATH };
+  }
+  return _questionTreeCache;
+}
 
 const QUESTION_STEPS = [
   "q_country", "q_business_type", "q_personal_name", "q_dob", "q_personal_address",
@@ -260,7 +277,7 @@ router.get("/onboarding/countries", async (_req, res) => {
 });
 
 router.get("/onboarding/question-tree", (_req, res) => {
-  res.json({ version: "1.0.0", root: "q_country", nodes: { note: "Full tree available in docs/onboarding/question-tree.json" } });
+  res.json(getQuestionTree());
 });
 
 function formatSession(s: typeof onboardingSessionsTable.$inferSelect, nextQuestion: object | null) {

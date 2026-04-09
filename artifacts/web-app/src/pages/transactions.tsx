@@ -36,7 +36,7 @@ export default function TransactionsPage() {
 
   const handleRefund = async (txId: string) => {
     try {
-      await refund.mutateAsync({ transactionId: txId });
+      await refund.mutateAsync({ transactionId: txId, data: {} });
       qc.invalidateQueries({ queryKey: getListTransactionsQueryKey(params) });
       toast({ title: "Refund processed", description: "The transaction has been refunded" });
     } catch {

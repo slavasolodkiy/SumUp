@@ -60,8 +60,9 @@ router.post("/products", requireAuth, async (req, res) => {
 });
 
 router.get("/products/:productId", requireAuth, async (req, res) => {
+  const productId = String(req.params["productId"]);
   const [product] = await db.select().from(productsTable)
-    .where(and(eq(productsTable.id, req.params["productId"]!), eq(productsTable.merchantId, req.merchantId!)))
+    .where(and(eq(productsTable.id, productId), eq(productsTable.merchantId, req.merchantId!)))
     .limit(1);
 
   if (!product) {
@@ -72,6 +73,7 @@ router.get("/products/:productId", requireAuth, async (req, res) => {
 });
 
 router.put("/products/:productId", requireAuth, async (req, res) => {
+  const productId = String(req.params["productId"]);
   const parsed = CreateProductBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "ValidationError", message: "Invalid request body" });
@@ -90,7 +92,7 @@ router.put("/products/:productId", requireAuth, async (req, res) => {
       imageUrl: parsed.data.image_url,
       updatedAt: new Date(),
     })
-    .where(and(eq(productsTable.id, req.params["productId"]!), eq(productsTable.merchantId, req.merchantId!)))
+    .where(and(eq(productsTable.id, productId), eq(productsTable.merchantId, req.merchantId!)))
     .returning();
 
   if (!product) {
@@ -101,8 +103,9 @@ router.put("/products/:productId", requireAuth, async (req, res) => {
 });
 
 router.delete("/products/:productId", requireAuth, async (req, res) => {
+  const productId = String(req.params["productId"]);
   await db.delete(productsTable)
-    .where(and(eq(productsTable.id, req.params["productId"]!), eq(productsTable.merchantId, req.merchantId!)));
+    .where(and(eq(productsTable.id, productId), eq(productsTable.merchantId, req.merchantId!)));
   res.status(204).send();
 });
 

@@ -92,10 +92,17 @@ router.post("/auth/refresh", async (req, res) => {
   }
 
   try {
-    const payload = verifyRefreshToken(parsed.data.refresh_token);
+    const incomingToken = parsed.data.refresh_token;
+    const payload = verifyRefreshToken(incomingToken);
+
     const [merchant] = await db.select().from(merchantsTable).where(eq(merchantsTable.id, payload.sub)).limit(1);
     if (!merchant) {
       res.status(401).json({ error: "Unauthorized", message: "Merchant not found" });
+      return;
+    }
+
+    if (!merchant.refreshToken || merchant.refreshToken !== incomingToken) {
+      res.status(401).json({ error: "Unauthorized", message: "Refresh token has been revoked or rotated" });
       return;
     }
 

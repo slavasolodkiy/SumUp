@@ -1,0 +1,77 @@
+You are continuing work in this repository: https://github.com/slavasolodkiy/SumUp
+
+Goal:
+Turn the repo into a truthful, runnable, tested “v1 reference platform” (no fake completion claims).
+
+Critical rules:
+1) Do not claim a phase is complete unless files + commands prove it.
+2) Keep all legal-safe constraints from previous task (public sources only, no reverse engineering or ToS violations).
+3) If something is still a stub, mark it clearly as STUB with TODO and rationale.
+4) Commit in small steps and push after each phase.
+
+Phase A — Reality alignment (must do first)
+1) Reconcile docs with actual implementation:
+- Update docs/progress-log.md to reflect real status.
+- Update docs/architecture/architecture-diagram.md to match actual implementation (modular monolith) OR implement missing services if you keep microservice claims.
+2) Add missing required deliverables:
+- README.md with exact local run instructions.
+- docker-compose.yml for at least PostgreSQL + api-server + web-app.
+- Seed script and seed data for demo merchant, products, transactions.
+3) Remove contradictory claims (mobile/tests/docker/readme) unless implemented.
+
+Phase B — Make build and typecheck green
+1) Fix backend TypeScript errors in:
+- artifacts/api-server/src/routes/payments.ts
+- artifacts/api-server/src/routes/products.ts
+(Express params typing issue: ensure param is always string before passing to drizzle eq)
+2) Fix web TypeScript error in:
+- artifacts/web-app/src/pages/transactions.tsx
+(refund mutation contract mismatch: pass required payload OR align OpenAPI/backend contract)
+3) Ensure these commands pass:
+- pnpm install
+- pnpm run typecheck
+- pnpm --filter @workspace/api-server run build
+- pnpm --filter @workspace/web-app run build
+
+Phase C — Onboarding engine single source of truth
+1) Remove drift between docs and API:
+- Make onboarding question tree consumed from a single source (e.g. shared JSON/module).
+- /api/onboarding/question-tree must return real tree, not placeholder.
+2) Implement branching from the tree (individual/sole trader/company/partnership/charity).
+3) Add explicit status transitions and validation gates so users cannot skip mandatory steps by sending arbitrary step_id.
+
+Phase D — Security/auth hardening
+1) Fail fast if SESSION_SECRET is missing in non-dev; no insecure default in production path.
+2) Refresh token rotation:
+- verify provided refresh token against stored token (prefer hashed storage),
+- invalidate old token on refresh,
+- enforce logout invalidation.
+3) Add basic rate-limiting middleware for auth endpoints.
+
+Phase E — Tests + CI
+1) Add tests for:
+- onboarding branching logic (individual vs company + high-turnover manual review branch),
+- auth refresh/logout token invalidation behavior,
+- refund flow contract.
+2) Add CI workflow (.github/workflows/ci.yml) running install + typecheck + tests + builds.
+3) Add coverage report output and document test commands in README.
+
+Phase F — Mobile artifact truthfulness
+Choose one and implement fully:
+Option 1 (preferred): create real Expo app at artifacts/mobile-app with login + onboarding + dashboard (read-only is acceptable for v1), wired to API.
+Option 2: if not possible in this iteration, explicitly mark mobile as NOT IMPLEMENTED and remove all “completed” claims from docs.
+
+Definition of done (must all be true)
+1) README.md exists and works.
+2) docker-compose.yml exists and brings up local stack.
+3) typecheck/build commands pass.
+4) tests exist and pass.
+5) progress-log and architecture docs are truthful.
+6) push all changes to GitHub with clear commits.
+7) final report includes:
+- implemented vs stubbed
+- exact commands run and outputs
+- remaining top 10 tasks
+- known risks
+
+Start now. Execute phases in order. Push after each phase.

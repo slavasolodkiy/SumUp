@@ -1,0 +1,61 @@
+version: "3.9"
+
+# Local development only — NOT for production.
+# Creates a Postgres database and starts both services.
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: payos
+      POSTGRES_PASSWORD: payos_dev
+      POSTGRES_DB: payos
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: artifacts/api-server/Dockerfile.dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: "4000"
+      DATABASE_URL: postgres://payos:payos_dev@db:5432/payos
+      SESSION_SECRET: dev-docker-secret-do-not-use-in-production
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+
+  web:
+    build:
+      context: .
+      dockerfile: artifacts/web-app/Dockerfile.dev
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: development
+      PORT: "5173"
+      VITE_API_URL: http://localhost:4000
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+
+volumes:
+  pgdata:
