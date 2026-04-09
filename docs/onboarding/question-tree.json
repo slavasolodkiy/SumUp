@@ -1,0 +1,474 @@
+{
+  "version": "1.0.0",
+  "description": "Onboarding question tree for SumUp-inspired merchant registration system. Based on publicly observable flow patterns. HYPOTHESIS items noted.",
+  "root": "q_country",
+  "nodes": {
+    "q_country": {
+      "id": "q_country",
+      "type": "select",
+      "question": "Where is your business based?",
+      "field": "country",
+      "options": [
+        { "value": "GB", "label": "United Kingdom" },
+        { "value": "DE", "label": "Germany" },
+        { "value": "FR", "label": "France" },
+        { "value": "ES", "label": "Spain" },
+        { "value": "IT", "label": "Italy" },
+        { "value": "AT", "label": "Austria" },
+        { "value": "BE", "label": "Belgium" },
+        { "value": "NL", "label": "Netherlands" },
+        { "value": "CH", "label": "Switzerland" },
+        { "value": "SE", "label": "Sweden" },
+        { "value": "DK", "label": "Denmark" },
+        { "value": "NO", "label": "Norway" },
+        { "value": "FI", "label": "Finland" },
+        { "value": "PL", "label": "Poland" },
+        { "value": "IE", "label": "Ireland" },
+        { "value": "PT", "label": "Portugal" },
+        { "value": "CZ", "label": "Czech Republic" },
+        { "value": "US", "label": "United States" },
+        { "value": "BR", "label": "Brazil" },
+        { "value": "AU", "label": "Australia" }
+      ],
+      "next": {
+        "default": "q_business_type"
+      }
+    },
+
+    "q_business_type": {
+      "id": "q_business_type",
+      "type": "select",
+      "question": "Which best describes your business?",
+      "field": "business_type",
+      "options": [
+        { "value": "individual", "label": "I'm an individual (not registered)" },
+        { "value": "sole_trader", "label": "Sole trader / self-employed" },
+        { "value": "registered_company", "label": "Registered company (Ltd, GmbH, SAS, etc.)" },
+        { "value": "partnership", "label": "Partnership" },
+        { "value": "charity", "label": "Charity / non-profit" }
+      ],
+      "next": {
+        "individual": "q_personal_name",
+        "sole_trader": "q_personal_name",
+        "registered_company": "q_company_name",
+        "partnership": "q_company_name",
+        "charity": "q_company_name"
+      }
+    },
+
+    "q_personal_name": {
+      "id": "q_personal_name",
+      "type": "name",
+      "question": "What is your full legal name?",
+      "fields": ["first_name", "last_name"],
+      "hint": "Use your name exactly as it appears on your ID",
+      "next": {
+        "default": "q_dob"
+      }
+    },
+
+    "q_dob": {
+      "id": "q_dob",
+      "type": "date",
+      "question": "What is your date of birth?",
+      "field": "date_of_birth",
+      "validation": {
+        "min_age": 18,
+        "error_under_age": "You must be at least 18 years old to register"
+      },
+      "next": {
+        "default": "q_personal_address"
+      }
+    },
+
+    "q_personal_address": {
+      "id": "q_personal_address",
+      "type": "address",
+      "question": "What is your home address?",
+      "fields": ["address_line1", "address_line2", "city", "postcode", "country"],
+      "next": {
+        "default": "q_phone"
+      }
+    },
+
+    "q_phone": {
+      "id": "q_phone",
+      "type": "tel",
+      "question": "What is your mobile number?",
+      "field": "phone",
+      "hint": "We'll send a verification code",
+      "next": {
+        "default": "q_phone_otp"
+      }
+    },
+
+    "q_phone_otp": {
+      "id": "q_phone_otp",
+      "type": "otp",
+      "question": "Enter the 6-digit code sent to your phone",
+      "field": "phone_otp",
+      "resend": true,
+      "next": {
+        "verified": "q_business_name",
+        "failed": "q_phone_otp_retry"
+      }
+    },
+
+    "q_phone_otp_retry": {
+      "id": "q_phone_otp_retry",
+      "type": "error_recovery",
+      "message": "Verification failed. Please check the code and try again.",
+      "max_attempts": 3,
+      "on_max_attempts": "manual_review",
+      "next": {
+        "retry": "q_phone_otp",
+        "change_number": "q_phone",
+        "max_reached": "outcome_manual_review"
+      }
+    },
+
+    "q_business_name": {
+      "id": "q_business_name",
+      "type": "text",
+      "question": "What is your business or trading name?",
+      "field": "business_name",
+      "hint": "This will appear on receipts",
+      "next": {
+        "default": "q_business_category"
+      }
+    },
+
+    "q_business_category": {
+      "id": "q_business_category",
+      "type": "category_select",
+      "question": "What type of business are you?",
+      "field": "business_category",
+      "categories": [
+        {
+          "group": "Food & Drink",
+          "options": ["Café", "Restaurant", "Bar", "Food Truck", "Bakery", "Other food & drink"]
+        },
+        {
+          "group": "Retail",
+          "options": ["Clothing & Fashion", "Gifts & Crafts", "Electronics", "Books & Stationery", "General retail"]
+        },
+        {
+          "group": "Health & Beauty",
+          "options": ["Hair Salon", "Nail Salon", "Spa & Wellness", "Barber", "Other beauty"]
+        },
+        {
+          "group": "Sport & Fitness",
+          "options": ["Gym / Fitness Centre", "Personal Trainer", "Sports Club", "Other sport"]
+        },
+        {
+          "group": "Services",
+          "options": ["Tradesperson / Contractor", "Cleaning", "Consulting", "Photography", "Other services"]
+        },
+        {
+          "group": "Events & Entertainment",
+          "options": ["Market Trader", "Event Organiser", "Music / Entertainment", "Other events"]
+        },
+        {
+          "group": "Charity & Non-profit",
+          "options": ["Registered charity", "Community group", "Other non-profit"]
+        },
+        {
+          "group": "Other",
+          "options": ["Other (please specify)"]
+        }
+      ],
+      "next": {
+        "default": "q_monthly_turnover"
+      }
+    },
+
+    "q_monthly_turnover": {
+      "id": "q_monthly_turnover",
+      "type": "select",
+      "question": "What is your estimated monthly card turnover?",
+      "field": "estimated_monthly_turnover",
+      "hypothesis": true,
+      "hypothesis_confidence": "High",
+      "hypothesis_note": "Risk assessment input — standard AML requirement. Exact options vary.",
+      "options": [
+        { "value": "0-1000", "label": "Under £1,000 / €1,000" },
+        { "value": "1001-5000", "label": "£1,001 – £5,000" },
+        { "value": "5001-15000", "label": "£5,001 – £15,000" },
+        { "value": "15001-50000", "label": "£15,001 – £50,000" },
+        { "value": "50001+", "label": "Over £50,000" }
+      ],
+      "next": {
+        "50001+": "q_enhanced_dd",
+        "default": "q_id_type"
+      }
+    },
+
+    "q_enhanced_dd": {
+      "id": "q_enhanced_dd",
+      "type": "info",
+      "message": "For higher-volume accounts, we may request additional information to complete your verification.",
+      "hypothesis": true,
+      "hypothesis_confidence": "High",
+      "hypothesis_note": "Enhanced due diligence at higher risk thresholds is standard AML practice.",
+      "next": {
+        "default": "q_id_type"
+      }
+    },
+
+    "q_id_type": {
+      "id": "q_id_type",
+      "type": "select",
+      "question": "What type of ID document will you use?",
+      "field": "id_type",
+      "options": [
+        { "value": "passport", "label": "Passport" },
+        { "value": "national_id", "label": "National ID card" },
+        { "value": "driving_licence", "label": "Driving licence" }
+      ],
+      "condition": {
+        "country": {
+          "US": { "options": ["passport", "driving_licence"] },
+          "BR": { "options": ["passport", "national_id"] },
+          "AU": { "options": ["passport", "driving_licence"] }
+        }
+      },
+      "next": {
+        "passport": "q_upload_passport",
+        "national_id": "q_upload_national_id",
+        "driving_licence": "q_upload_driving_licence"
+      }
+    },
+
+    "q_upload_passport": {
+      "id": "q_upload_passport",
+      "type": "document_upload",
+      "question": "Upload a photo of your passport",
+      "field": "passport_image",
+      "instructions": "Open to the photo page. Ensure all details are clearly visible.",
+      "sides": ["front"],
+      "next": {
+        "default": "q_selfie"
+      }
+    },
+
+    "q_upload_national_id": {
+      "id": "q_upload_national_id",
+      "type": "document_upload",
+      "question": "Upload photos of your national ID card",
+      "field": "national_id_images",
+      "sides": ["front", "back"],
+      "next": {
+        "default": "q_selfie"
+      }
+    },
+
+    "q_upload_driving_licence": {
+      "id": "q_upload_driving_licence",
+      "type": "document_upload",
+      "question": "Upload photos of your driving licence",
+      "field": "driving_licence_images",
+      "sides": ["front", "back"],
+      "next": {
+        "default": "q_selfie"
+      }
+    },
+
+    "q_selfie": {
+      "id": "q_selfie",
+      "type": "liveness_check",
+      "question": "Take a selfie to verify your identity",
+      "field": "selfie_image",
+      "hint": "Look directly at the camera. Remove glasses if worn.",
+      "hypothesis": true,
+      "hypothesis_confidence": "High",
+      "hypothesis_note": "Liveness check is standard KYC for fintech. Exact implementation varies.",
+      "next": {
+        "passed": "q_bank_details",
+        "failed": "q_selfie_retry"
+      }
+    },
+
+    "q_selfie_retry": {
+      "id": "q_selfie_retry",
+      "type": "error_recovery",
+      "message": "We couldn't verify your identity. Please try again in good lighting.",
+      "max_attempts": 3,
+      "next": {
+        "retry": "q_selfie",
+        "max_reached": "outcome_manual_review"
+      }
+    },
+
+    "q_company_name": {
+      "id": "q_company_name",
+      "type": "text",
+      "question": "What is your company's legal name?",
+      "field": "company_name",
+      "next": {
+        "default": "q_company_reg_number"
+      }
+    },
+
+    "q_company_reg_number": {
+      "id": "q_company_reg_number",
+      "type": "text",
+      "question": "What is your company registration number?",
+      "field": "company_registration_number",
+      "hint": "Find this on your certificate of incorporation",
+      "next": {
+        "default": "q_company_address"
+      }
+    },
+
+    "q_company_address": {
+      "id": "q_company_address",
+      "type": "address",
+      "question": "What is your registered company address?",
+      "fields": ["address_line1", "address_line2", "city", "postcode", "country"],
+      "next": {
+        "default": "q_vat"
+      }
+    },
+
+    "q_vat": {
+      "id": "q_vat",
+      "type": "toggle_text",
+      "question": "Are you VAT registered?",
+      "field": "vat_registered",
+      "conditional_field": "vat_number",
+      "conditional_label": "VAT number",
+      "next": {
+        "default": "q_director_details"
+      }
+    },
+
+    "q_director_details": {
+      "id": "q_director_details",
+      "type": "person_details",
+      "question": "Tell us about the company director / authorised signatory",
+      "fields": ["director_first_name", "director_last_name", "director_dob", "director_nationality"],
+      "next": {
+        "default": "q_ubo"
+      }
+    },
+
+    "q_ubo": {
+      "id": "q_ubo",
+      "type": "ubo_declaration",
+      "question": "Are there any individuals who own 25% or more of the company?",
+      "field": "has_ubo",
+      "hypothesis": true,
+      "hypothesis_confidence": "High",
+      "hypothesis_note": "UBO declaration is required by EU 5AMLD / 6AMLD and UK AMLD.",
+      "next": {
+        "yes": "q_ubo_details",
+        "no": "q_company_documents"
+      }
+    },
+
+    "q_ubo_details": {
+      "id": "q_ubo_details",
+      "type": "person_list",
+      "question": "Add beneficial owner details",
+      "fields": ["ubo_first_name", "ubo_last_name", "ubo_dob", "ubo_nationality", "ubo_ownership_percentage"],
+      "repeatable": true,
+      "next": {
+        "default": "q_company_documents"
+      }
+    },
+
+    "q_company_documents": {
+      "id": "q_company_documents",
+      "type": "document_upload",
+      "question": "Upload your certificate of incorporation",
+      "field": "certificate_of_incorporation",
+      "sides": ["single"],
+      "next": {
+        "default": "q_company_personal_id"
+      }
+    },
+
+    "q_company_personal_id": {
+      "id": "q_company_personal_id",
+      "type": "info",
+      "message": "We also need to verify the identity of the authorised signatory.",
+      "next": {
+        "default": "q_id_type"
+      }
+    },
+
+    "q_bank_details": {
+      "id": "q_bank_details",
+      "type": "bank_details",
+      "question": "Add your bank account for payouts",
+      "fields_by_country": {
+        "GB": ["sort_code", "account_number", "account_name"],
+        "US": ["routing_number", "account_number", "account_name", "bank_name"],
+        "EU": ["iban", "bic", "account_name"],
+        "BR": ["cpf", "bank_code", "agency", "account_number"],
+        "AU": ["bsb", "account_number", "account_name"]
+      },
+      "next": {
+        "default": "q_review"
+      }
+    },
+
+    "q_review": {
+      "id": "q_review",
+      "type": "review",
+      "question": "Review your information",
+      "description": "Check your details before submitting. You can edit any section.",
+      "sections": ["personal", "business", "identity", "banking"],
+      "next": {
+        "submit": "outcome_submitted"
+      }
+    },
+
+    "outcome_submitted": {
+      "id": "outcome_submitted",
+      "type": "outcome",
+      "message": "Your application has been submitted.",
+      "next_states": {
+        "auto_approved": "outcome_approved",
+        "pending_review": "outcome_pending",
+        "needs_more_info": "outcome_more_info",
+        "rejected": "outcome_rejected"
+      }
+    },
+
+    "outcome_approved": {
+      "id": "outcome_approved",
+      "type": "success",
+      "message": "You're approved! Let's get started.",
+      "cta": "Go to Dashboard"
+    },
+
+    "outcome_pending": {
+      "id": "outcome_pending",
+      "type": "pending",
+      "message": "We're reviewing your application. This usually takes 1-3 business days.",
+      "cta": "OK"
+    },
+
+    "outcome_more_info": {
+      "id": "outcome_more_info",
+      "type": "action_required",
+      "message": "We need a bit more information to verify your account.",
+      "cta": "Provide information"
+    },
+
+    "outcome_rejected": {
+      "id": "outcome_rejected",
+      "type": "rejection",
+      "message": "Unfortunately we're unable to approve your account at this time.",
+      "cta": "Learn more"
+    },
+
+    "outcome_manual_review": {
+      "id": "outcome_manual_review",
+      "type": "pending",
+      "message": "Your identity verification needs manual review. We'll be in touch within 2 business days.",
+      "cta": "OK"
+    }
+  }
+}

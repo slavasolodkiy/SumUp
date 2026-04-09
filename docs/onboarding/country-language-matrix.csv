@@ -1,0 +1,27 @@
+country_code,country_name,currency,language_primary,languages_supported,id_documents_accepted,bank_format,business_account_available,kyc_provider_hypothesis,regulatory_framework,notes
+GB,United Kingdom,GBP,en,en,passport|driving_licence|national_id,sort_code+account_number,Yes,Onfido or Jumio (HYPOTHESIS),FCA / UK AMLD,FCA regulated; SumUp has own EMI license
+DE,Germany,EUR,de,"de,en",passport|national_id|driving_licence,IBAN+BIC,Yes,Onfido or IDnow (HYPOTHESIS),BaFin / EU 5AMLD,
+FR,France,EUR,fr,"fr,en",passport|national_id|driving_licence,IBAN+BIC,Yes,Onfido or IDEMIA (HYPOTHESIS),ACPR / EU 5AMLD,
+ES,Spain,EUR,es,"es,en",passport|national_id|driving_licence,IBAN+BIC,Yes,(HYPOTHESIS),Banco de España / EU 5AMLD,
+IT,Italy,EUR,it,"it,en",passport|national_id|driving_licence,IBAN+BIC,Yes,(HYPOTHESIS),Banca d'Italia / EU 5AMLD,
+AT,Austria,EUR,de,"de,en",passport|national_id|driving_licence,IBAN+BIC,Yes,(HYPOTHESIS),FMA / EU 5AMLD,
+BE,Belgium,EUR,"fr,nl","fr,nl,en",passport|national_id|driving_licence,IBAN+BIC,Yes,(HYPOTHESIS),NBB / EU 5AMLD,Bilingual: French+Dutch
+NL,Netherlands,EUR,nl,"nl,en",passport|national_id|driving_licence,IBAN+BIC,Yes,(HYPOTHESIS),DNB / EU 5AMLD,
+CH,Switzerland,CHF,de,"de,fr,it,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),FINMA,Not EU — separate regulatory framework
+SE,Sweden,SEK,sv,"sv,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),Finansinspektionen / EU 5AMLD,
+DK,Denmark,DKK,da,"da,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),Finanstilsynet / EU 5AMLD,
+NO,Norway,NOK,nb,"nb,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),Finanstilsynet NO / EU equivalent,Not EU member; EEA
+FI,Finland,EUR,fi,"fi,sv,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),FIN-FSA / EU 5AMLD,Finnish listing page confirms availability
+PL,Poland,PLN,pl,"pl,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),KNF / EU 5AMLD,
+IE,Ireland,EUR,en,"en,ga",passport|driving_licence|national_id,IBAN+BIC,Yes,(HYPOTHESIS),CBI / EU 5AMLD,
+PT,Portugal,EUR,pt,"pt,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),Banco de Portugal / EU 5AMLD,
+CZ,Czech Republic,CZK,cs,"cs,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),CNB / EU 5AMLD,Non-euro EU member
+SK,Slovakia,EUR,sk,"sk,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),NBS / EU 5AMLD,
+HU,Hungary,HUF,hu,"hu,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),MNB / EU 5AMLD,Non-euro EU member
+RO,Romania,RON,ro,"ro,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),BNR / EU 5AMLD,Non-euro EU member
+HR,Croatia,EUR,hr,"hr,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),HANFA / EU 5AMLD,Joined eurozone Jan 2023
+GR,Greece,EUR,el,"el,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),BoG / EU 5AMLD,
+BG,Bulgaria,BGN,bg,"bg,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),BNB / EU 5AMLD,Non-euro EU member
+US,United States,USD,en,en,passport|driving_licence|state_id,routing+account_number,No,Jumio or Persona (HYPOTHESIS),FinCEN / state MTL,Money transmitter licenses required per state
+BR,Brazil,BRL,pt-BR,pt-BR,passport|cpf_card|rg,CPF+bank_code+agency+account,No,(HYPOTHESIS),Banco Central do Brasil,High growth market; separate BACEN requirements
+AU,Australia,AUD,en,en,passport|driving_licence,BSB+account_number,No,(HYPOTHESIS),AUSTRAC / ASIC,

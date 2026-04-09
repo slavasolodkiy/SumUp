@@ -1,0 +1,88 @@
+You are a principal engineer + product analyst.
+
+Goal:
+Build a legally-safe “SumUp-inspired” multi-platform reference system and research pack based on public information from:
+1) https://www.sumup.com (including country/business vertical variants you can access publicly)
+2) https://apps.apple.com/fi/app/sumup-payments-and-pos/id514879214
+3) https://play.google.com/store/apps/details?id=com.kaching.merchant&hl=en_GB
+
+Critical constraints:
+1) Do NOT copy trademarked assets, brand identity, proprietary text, or private/internal code.
+2) Do NOT bypass auth, scrape gated/private data, reverse engineer binaries, or violate ToS.
+3) Any non-observable architecture details must be marked as HYPOTHESIS with confidence score (High/Medium/Low) and evidence.
+4) Use only public, legal sources. Cite every major claim.
+
+Main outputs:
+1) Research docs with citations:
+- docs/research/web-analysis.md
+- docs/research/ios-analysis.md
+- docs/research/android-analysis.md
+- docs/research/tech-stack-observed.md
+- docs/research/external-integrations.md
+- docs/research/public-api-opportunities.md
+
+2) Architecture + implementation:
+- A working monorepo with:
+  - web app
+  - mobile app (single codebase for iOS/Android if possible)
+  - backend microservices
+  - API gateway
+  - auth/ID service
+  - onboarding service
+  - merchant/profile service
+  - payments simulation service
+  - integration adapters (stubs where real APIs are unavailable)
+
+3) Deep onboarding decomposition (top priority):
+- docs/onboarding/onboarding-master-map.md
+- docs/onboarding/question-tree.json
+- docs/onboarding/country-language-matrix.csv
+- docs/onboarding/individual-vs-business-flows.md
+- docs/onboarding/kyc-kyb-decision-table.csv
+Include:
+- all observed question types and answer options
+- branch logic after each answer
+- differences by user type (individual/sole trader/business)
+- supported countries, registration types, ID/passport/doc requirements (as publicly observable)
+- supported languages
+- risk flags and fallback/manual-review paths
+- where assumptions are made
+
+4) API & middleware analysis:
+- document potential middleware patterns, APIs, auth flows, SSO/ID/onboarding touchpoints
+- explicitly separate:
+  - observed/publicly documented
+  - inferred hypotheses
+
+5) Engineering quality:
+- README with local run instructions
+- docker-compose for local stack
+- sample seed data
+- test coverage for core onboarding branching logic
+- architecture diagram (Mermaid)
+
+GitHub workflow (mandatory):
+1) Initialize git immediately.
+2) Push incrementally after each phase.
+3) Create clear commits with conventional messages.
+4) Keep a progress log in docs/progress-log.md.
+5) At the end, provide:
+- repo tree
+- what is fully implemented vs stubbed
+- known gaps
+- next 10 prioritized tasks
+
+Implementation preference:
+- Choose pragmatic stack suitable for Replit (e.g., TypeScript Node backend + Next.js + React Native Expo), but you may choose alternatives if justified.
+- Keep code modular and extensible.
+- Use mock/simulated providers where real provider APIs are unavailable.
+
+Execution order:
+Phase 1: research + evidence collection
+Phase 2: architecture proposal
+Phase 3: scaffold monorepo + services
+Phase 4: implement onboarding engine + branching
+Phase 5: implement web/mobile flows
+Phase 6: tests + docs + final push
+
+Start now.

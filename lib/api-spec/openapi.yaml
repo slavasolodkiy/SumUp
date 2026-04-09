@@ -2,14 +2,25 @@ openapi: 3.1.0
 info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 1.0.0
+  description: SumUp-inspired payments platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: merchants
+    description: Merchant profile
+  - name: onboarding
+    description: Merchant onboarding
+  - name: payments
+    description: Payments and transactions
+  - name: products
+    description: Product catalog
+
 paths:
   /healthz:
     get:
@@ -24,7 +35,585 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH ─────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: registerMerchant
+      summary: Register a new merchant account
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: loginMerchant
+      summary: Log in with email and password
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      summary: Refresh access token
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: New tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/logout:
+    post:
+      operationId: logoutMerchant
+      summary: Log out
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Logged out
+
+  # ─── MERCHANT PROFILE ─────────────────────────────────────────────────────
+  /merchants/me:
+    get:
+      operationId: getMyMerchant
+      summary: Get current merchant profile
+      tags: [merchants]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Merchant profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Merchant"
+    put:
+      operationId: updateMyMerchant
+      summary: Update merchant profile
+      tags: [merchants]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMerchantRequest"
+      responses:
+        "200":
+          description: Updated merchant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Merchant"
+
+  /merchants/me/summary:
+    get:
+      operationId: getMerchantSummary
+      summary: Get dashboard summary stats
+      tags: [merchants]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantSummary"
+
+  # ─── ONBOARDING ───────────────────────────────────────────────────────────
+  /onboarding/session:
+    get:
+      operationId: getOnboardingSession
+      summary: Get current onboarding session
+      tags: [onboarding]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Session state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingSession"
+    post:
+      operationId: createOnboardingSession
+      summary: Start a new onboarding session
+      tags: [onboarding]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingSession"
+
+  /onboarding/session/step:
+    post:
+      operationId: submitOnboardingStep
+      summary: Submit an onboarding step
+      tags: [onboarding]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardingStepRequest"
+      responses:
+        "200":
+          description: Step submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingSession"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /onboarding/session/kyc/verify:
+    post:
+      operationId: submitKycVerification
+      summary: Submit KYC documents for verification
+      tags: [onboarding]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KycSubmitRequest"
+      responses:
+        "200":
+          description: KYC submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KycVerificationResult"
+
+  /onboarding/countries:
+    get:
+      operationId: getSupportedCountries
+      summary: List supported countries
+      tags: [onboarding]
+      responses:
+        "200":
+          description: Country list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Country"
+
+  /onboarding/question-tree:
+    get:
+      operationId: getQuestionTree
+      summary: Get onboarding question tree
+      tags: [onboarding]
+      parameters:
+        - in: query
+          name: country
+          schema:
+            type: string
+        - in: query
+          name: business_type
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Question tree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionTree"
+
+  # ─── TRANSACTIONS ──────────────────────────────────────────────────────────
+  /payments/transactions:
+    get:
+      operationId: listTransactions
+      summary: List transactions
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, successful, failed, refunded]
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionListResponse"
+
+    post:
+      operationId: createTransaction
+      summary: Create a simulated transaction
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionRequest"
+      responses:
+        "201":
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /payments/transactions/{transactionId}:
+    get:
+      operationId: getTransaction
+      summary: Get a transaction
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /payments/transactions/{transactionId}/refund:
+    post:
+      operationId: refundTransaction
+      summary: Refund a transaction
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefundRequest"
+      responses:
+        "200":
+          description: Refund processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /payments/checkouts:
+    post:
+      operationId: createCheckout
+      summary: Create a payment link
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCheckoutRequest"
+      responses:
+        "201":
+          description: Checkout created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Checkout"
+
+    get:
+      operationId: listCheckouts
+      summary: List payment links
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Checkout list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Checkout"
+
+  /payments/summary:
+    get:
+      operationId: getPaymentSummary
+      summary: Get aggregated payment stats
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [today, week, month, year]
+            default: month
+      responses:
+        "200":
+          description: Payment summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSummary"
+
+  /payments/payouts:
+    get:
+      operationId: listPayouts
+      summary: List payouts
+      tags: [payments]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Payout list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payout"
+
+  # ─── PRODUCTS ─────────────────────────────────────────────────────────────
+  /products:
+    get:
+      operationId: listProducts
+      summary: List products
+      tags: [products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: active
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+    post:
+      operationId: createProduct
+      summary: Create a product
+      tags: [products]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      summary: Get a product
+      tags: [products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      operationId: updateProduct
+      summary: Update a product
+      tags: [products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+    delete:
+      operationId: deleteProduct
+      summary: Delete a product
+      tags: [products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /products/categories:
+    get:
+      operationId: listProductCategories
+      summary: List product categories
+      tags: [products]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductCategory"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +623,538 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+
+    # ─── AUTH ────────────────────────────────────────────────────────────────
+    RegisterRequest:
+      type: object
+      required: [email, password, first_name, last_name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        first_name:
+          type: string
+        last_name:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    RefreshTokenRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [access_token, refresh_token, merchant]
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        merchant:
+          $ref: "#/components/schemas/Merchant"
+
+    # ─── MERCHANT ────────────────────────────────────────────────────────────
+    Merchant:
+      type: object
+      required: [id, email, first_name, last_name, status, country, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        status:
+          type: string
+          enum: [pending_onboarding, onboarding_in_progress, active, suspended, rejected]
+        country:
+          type: string
+        business_name:
+          type: string
+        business_type:
+          type: string
+        business_category:
+          type: string
+        onboarding_status:
+          type: string
+          enum: [not_started, in_progress, submitted, approved, rejected, needs_more_info]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UpdateMerchantRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        business_name:
+          type: string
+        business_category:
+          type: string
+
+    MerchantSummary:
+      type: object
+      required: [today_volume, today_transactions, week_volume, month_volume, currency, recent_transactions]
+      properties:
+        today_volume:
+          type: number
+        today_transactions:
+          type: integer
+        week_volume:
+          type: number
+        month_volume:
+          type: number
+        currency:
+          type: string
+        recent_transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        top_products:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopProduct"
+
+    TopProduct:
+      type: object
+      required: [product_id, name, total_sold, total_volume]
+      properties:
+        product_id:
+          type: string
+        name:
+          type: string
+        total_sold:
+          type: integer
+        total_volume:
+          type: number
+
+    # ─── ONBOARDING ──────────────────────────────────────────────────────────
+    OnboardingSession:
+      type: object
+      required: [id, merchant_id, current_step, status, answers, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        merchant_id:
+          type: string
+          format: uuid
+        current_step:
+          type: string
+        status:
+          type: string
+          enum: [not_started, in_progress, kyc_pending, kyc_approved, banking_complete, submitted, approved, rejected, needs_more_info, manual_review]
+        answers:
+          type: object
+          additionalProperties: true
+        next_question:
+          $ref: "#/components/schemas/OnboardingQuestion"
+        progress_percent:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    OnboardingQuestion:
+      type: object
+      required: [id, type, question]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        question:
+          type: string
+        hint:
+          type: string
+        field:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionOption"
+
+    QuestionOption:
+      type: object
+      required: [value, label]
+      properties:
+        value:
+          type: string
+        label:
+          type: string
+
+    OnboardingStepRequest:
+      type: object
+      required: [step_id, answer]
+      properties:
+        step_id:
+          type: string
+        answer:
+          type: object
+          additionalProperties: true
+
+    KycSubmitRequest:
+      type: object
+      required: [id_type]
+      properties:
+        id_type:
+          type: string
+          enum: [passport, national_id, driving_licence]
+        document_front_base64:
+          type: string
+        document_back_base64:
+          type: string
+        selfie_base64:
+          type: string
+
+    KycVerificationResult:
+      type: object
+      required: [status, session_id]
+      properties:
+        status:
+          type: string
+          enum: [pending, approved, rejected, manual_review]
+        session_id:
+          type: string
+        message:
+          type: string
+
+    Country:
+      type: object
+      required: [code, name, currency, languages]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        currency:
+          type: string
+        languages:
+          type: array
+          items:
+            type: string
+        bank_format:
+          type: string
+        regulatory_framework:
+          type: string
+
+    QuestionTree:
+      type: object
+      required: [version, root, nodes]
+      properties:
+        version:
+          type: string
+        root:
+          type: string
+        nodes:
+          type: object
+          additionalProperties: true
+
+    # ─── PAYMENTS ────────────────────────────────────────────────────────────
+    Transaction:
+      type: object
+      required: [id, merchant_id, amount, currency, status, payment_method, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        merchant_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, successful, failed, refunded, partially_refunded]
+        payment_method:
+          type: string
+          enum: [card, tap_to_pay, payment_link, cash]
+        card_last_four:
+          type: string
+        card_scheme:
+          type: string
+          enum: [visa, mastercard, amex, maestro]
+        product_id:
+          type: string
+        product_name:
+          type: string
+        description:
+          type: string
+        receipt_sent:
+          type: boolean
+        customer_email:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        refunded_at:
+          type: string
+          format: date-time
+
+    TransactionListResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    CreateTransactionRequest:
+      type: object
+      required: [amount, currency, payment_method]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+        currency:
+          type: string
+        payment_method:
+          type: string
+          enum: [card, tap_to_pay, payment_link, cash]
+        description:
+          type: string
+        product_id:
+          type: string
+        customer_email:
+          type: string
+
+    RefundRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+
+    CreateCheckoutRequest:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        redirect_url:
+          type: string
+
+    Checkout:
+      type: object
+      required: [id, merchant_id, amount, currency, status, checkout_url, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        merchant_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        currency:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid, expired, cancelled]
+        checkout_url:
+          type: string
+        redirect_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+
+    PaymentSummary:
+      type: object
+      required: [period, total_volume, total_transactions, currency, daily_breakdown]
+      properties:
+        period:
+          type: string
+        total_volume:
+          type: number
+        total_transactions:
+          type: integer
+        average_transaction:
+          type: number
+        currency:
+          type: string
+        daily_breakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyVolume"
+        by_payment_method:
+          type: array
+          items:
+            $ref: "#/components/schemas/MethodVolume"
+
+    DailyVolume:
+      type: object
+      required: [date, volume, count]
+      properties:
+        date:
+          type: string
+          format: date
+        volume:
+          type: number
+        count:
+          type: integer
+
+    MethodVolume:
+      type: object
+      required: [method, volume, count, percentage]
+      properties:
+        method:
+          type: string
+        volume:
+          type: number
+        count:
+          type: integer
+        percentage:
+          type: number
+
+    Payout:
+      type: object
+      required: [id, merchant_id, amount, currency, status, payout_date, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        merchant_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, paid, failed]
+        payout_date:
+          type: string
+          format: date
+        reference:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    # ─── PRODUCTS ────────────────────────────────────────────────────────────
+    Product:
+      type: object
+      required: [id, merchant_id, name, price, currency, active, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        merchant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+        category:
+          type: string
+        sku:
+          type: string
+        active:
+          type: boolean
+        image_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateProductRequest:
+      type: object
+      required: [name, price, currency]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+        category:
+          type: string
+        sku:
+          type: string
+        active:
+          type: boolean
+          default: true
+        image_url:
+          type: string
+
+    ProductCategory:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        merchant_id:
+          type: string
