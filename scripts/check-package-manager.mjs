@@ -2,8 +2,8 @@
 /**
  * Cross-platform preinstall guard.
  *
- * Replaces the sh-based preinstall script so this works on Linux, macOS, AND
- * Windows (PowerShell / cmd) without requiring a POSIX shell.
+ * Works on Linux, macOS, AND Windows (PowerShell / cmd) — no POSIX shell
+ * required. Uses Node.js built-ins only.
  *
  * What it does:
  *   1. Errors out if the install is not being run via pnpm.
@@ -12,15 +12,19 @@
  */
 
 import { existsSync, unlinkSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = new URL("../", import.meta.url).pathname;
+// Resolve workspace root: this file lives at <root>/scripts/check-package-manager.mjs
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const root = resolve(__dirname, "..");
 
 const agent = process.env.npm_config_user_agent ?? "";
 
 if (!agent.startsWith("pnpm/")) {
   process.stderr.write(
-    "\n❌  This project uses pnpm.\n" +
+    "\n\u274c  This project uses pnpm.\n" +
     "    Please install it: https://pnpm.io/installation\n" +
     "    Then run: pnpm install\n\n"
   );

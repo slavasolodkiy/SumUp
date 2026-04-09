@@ -1,0 +1,55 @@
+You are continuing work in https://github.com/slavasolodkiy/SumUp on branch main.
+Current HEAD reference from reviewer: a7f1e1e (2026-04-09).
+
+Goal: ship v1.3 with zero truth gaps and reproducible verification evidence.
+
+Non-negotiable rules:
+- Do not claim anything unless verified by command output.
+- If something is not run, write NOT RUN.
+- Final HEAD must not re-remove CI after restoring it.
+
+Phase 1 - CI truth closure
+1) Restore `.github/workflows/ci.yml` in HEAD.
+2) Ensure docs match reality:
+   - README.md
+   - docs/progress-log.md
+   - replit.md
+3) Remove any statement saying CI exists unless file exists in final HEAD.
+
+Phase 2 - Preinstall portability fix
+1) In `scripts/check-package-manager.mjs`, replace URL pathname root logic with `fileURLToPath(import.meta.url)` + `dirname(...)`.
+2) Keep behavior unchanged: pnpm-only guard + lockfile cleanup.
+
+Phase 3 - Onboarding country consistency
+1) Reconcile country counts:
+   - Runtime countries endpoint / q_country options
+   - `docs/onboarding/country-language-matrix.csv`
+   - README/progress-log/replit.md claims
+2) Either:
+   - Make runtime and docs use same count, or
+   - Explicitly document "runtime subset vs research matrix" with exact numbers.
+3) Fix Denmark metadata in API countries payload (bank format/regulatory values).
+4) Add/adjust tests for country payload integrity and expected count policy.
+
+Phase 4 - Stale doc numbers
+1) Update stale test-count claims in replit.md (currently mixed 21/25).
+2) Update all onboarding country-number claims (currently mixed 20/26/27).
+
+Verification (run and include outputs):
+- pnpm run typecheck
+- pnpm --filter @workspace/api-server run test
+- pnpm --filter @workspace/api-server run build
+- pnpm run build
+- if environment constraints apply, explain exactly which env is supported and show passing outputs in that env.
+
+Deliverables:
+1) Files changed
+2) Exact commands run + outputs
+3) Final truth table:
+   - CI file exists? (yes/no)
+   - Runtime country count
+   - CSV country count
+   - Test count
+   - Supported environments
+4) Remaining deferred items
+5) Commit hashes by phase and push confirmation

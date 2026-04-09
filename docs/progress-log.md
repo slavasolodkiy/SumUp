@@ -20,7 +20,7 @@
 
 - [2026-04-09] docs/onboarding/onboarding-master-map.md — Completed (all phases, branches, risk flags)
 - [2026-04-09] docs/onboarding/question-tree.json — Completed (full branching tree, all entity types)
-- [2026-04-09] docs/onboarding/country-language-matrix.csv — Completed (27 countries, languages, ID types, banking formats, regulatory frameworks)
+- [2026-04-09] docs/onboarding/country-language-matrix.csv — Completed (26 countries, languages, ID types, banking formats, regulatory frameworks)
 - [2026-04-09] docs/onboarding/individual-vs-business-flows.md — Completed (5 entity types, KYC vs KYB decision logic, fallback paths)
 - [2026-04-09] docs/onboarding/kyc-kyb-decision-table.csv — Completed (decision matrix for all entity types)
 
@@ -123,3 +123,25 @@ Verified state at start of v1.2:
 
 **Rule:** The entry "CI workflow exists" may only appear in this log when `.github/workflows/ci.yml` exists in HEAD.
 Current state: `.github/workflows/ci.yml` — **EXISTS** (restored in v1.2)
+
+### Phase v1.3: Zero Truth Gaps + Cross-Platform Fix ✅
+
+Verified baseline at v1.3 start:
+- `.github/workflows/ci.yml` — MISSING in HEAD (removed by checkpoint after v1.2) → RESTORED
+- `replit.md` — claimed 21 tests (stale), 25 tests (stale), CI reference with no file → CORRECTED
+- `README.md` — claimed "27 countries" for CSV that has 26 rows → CORRECTED
+- `scripts/check-package-manager.mjs` — used `new URL(...).pathname` (Windows-broken) → FIXED
+- DK entry in `COUNTRIES` array had `bank_format: "Finanstilsynet"` (regulatory body, not format) → FIXED
+
+Changes:
+- [2026-04-09] Phase 1 — `.github/workflows/ci.yml` restored (215 lines, 5 jobs)
+- [2026-04-09] Phase 2 — `scripts/check-package-manager.mjs`: replaced URL pathname with `fileURLToPath(import.meta.url)` + `dirname()` (cross-platform Node.js path resolution)
+- [2026-04-09] Phase 3 — DK COUNTRIES entry fixed: `bank_format: "IBAN+BIC|Reg+Kontonummer (local)"`, `regulatory_framework: "Finanstilsynet"` (separated previously conflated values); country count documented as 20 runtime / 26 CSV; DK integrity test added
+- [2026-04-09] Phase 4 — All stale test counts corrected to 28 (verified); CSV country count corrected to 26 (verified)
+
+Verified outputs:
+- `pnpm run typecheck` → 4/4 packages clean
+- `pnpm --filter @workspace/api-server run test` → 28/28 pass
+- `pnpm --filter @workspace/api-server run build` → ⚡ Done in 1238ms
+- `BASE_PATH=/ PORT=5173 pnpm --filter @workspace/web-app run build` → ✓ built in 8.27s
+- `.github/workflows/ci.yml` exists in HEAD: YES (215 lines)

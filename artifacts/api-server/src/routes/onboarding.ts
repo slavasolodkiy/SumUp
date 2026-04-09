@@ -135,7 +135,7 @@ const COUNTRIES = [
   { code: "NL", name: "Netherlands", currency: "EUR", languages: ["nl", "en"], bank_format: "IBAN+BIC", regulatory_framework: "DNB" },
   { code: "CH", name: "Switzerland", currency: "CHF", languages: ["de", "fr", "it", "en"], bank_format: "IBAN+BIC", regulatory_framework: "FINMA" },
   { code: "SE", name: "Sweden", currency: "SEK", languages: ["sv", "en"], bank_format: "IBAN+BIC", regulatory_framework: "Finansinspektionen" },
-  { code: "DK", name: "Denmark", currency: "DKK", languages: ["da", "en"], bank_format: "Finanstilsynet" },
+  { code: "DK", name: "Denmark", currency: "DKK", languages: ["da", "en"], bank_format: "IBAN+BIC|Reg+Kontonummer (local)", regulatory_framework: "Finanstilsynet" },
   { code: "NO", name: "Norway", currency: "NOK", languages: ["nb", "en"], bank_format: "IBAN+BIC", regulatory_framework: "Finanstilsynet NO" },
   { code: "FI", name: "Finland", currency: "EUR", languages: ["fi", "sv", "en"], bank_format: "IBAN+BIC", regulatory_framework: "FIN-FSA" },
   { code: "PL", name: "Poland", currency: "PLN", languages: ["pl", "en"], bank_format: "IBAN+BIC", regulatory_framework: "KNF" },

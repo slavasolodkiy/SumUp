@@ -85,14 +85,16 @@ JWT-based: access + refresh tokens (both include `jti` for uniqueness). Stored i
 - `docs/onboarding/question-tree.json` is the single source of truth for all onboarding questions
 - `GET /api/onboarding/question-tree` serves this file directly (cached in-memory)
 - Individual vs company branching logic in `artifacts/api-server/src/routes/onboarding.ts`
-- 20 countries, 5 entity types (individual, sole_trader, registered_company, partnership, charity)
+- **Runtime: 20 countries** (curated active list served by `GET /api/onboarding/countries`)
+- **Research CSV: 26 countries** (`docs/onboarding/country-language-matrix.csv` — broader research set, not all active in runtime)
+- 5 entity types (individual, sole_trader, registered_company, partnership, charity)
 
 ## Testing (Phase E)
 
 - Integration tests: `pnpm --filter @workspace/api-server run test`
-- 21 tests across 3 suites: auth, payments, onboarding
+- **28 tests** across 3 suites: auth, payments, onboarding
 - Vitest + Supertest; runs against live DATABASE_URL
-- CI: `.github/workflows/ci.yml` (typecheck + test on push/PR)
+- CI: `.github/workflows/ci.yml` — 5 jobs: install, typecheck, test (Postgres service), build-api, build-web
 
 ## Mobile App
 
@@ -115,7 +117,7 @@ NOT YET IMPLEMENTED. See `docs/architecture/mobile-plan.md` for planned Expo des
 
 - `pnpm run typecheck` — full typecheck across all packages (4/4 clean)
 - `pnpm --filter @workspace/api-server run build` — build API server (web-app builds at Replit deploy time)
-- `pnpm --filter @workspace/api-server run test` — run 25 integration tests (auth + payments + onboarding)
+- `pnpm --filter @workspace/api-server run test` — run 28 integration tests (auth + payments + onboarding)
 - `pnpm --filter @workspace/scripts run seed` — seed demo data (idempotent — skips if demo@payos.com exists)
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (also aliased as `migrate`)

@@ -28,10 +28,25 @@ describe("Onboarding routes", () => {
     const res = await request(app).get("/api/onboarding/countries");
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBeGreaterThan(10);
+    // Runtime list is a curated subset of 20 countries
+    // (research CSV has 26; these are the countries where PayOS is active)
+    expect(res.body.length).toBe(20);
     const gb = res.body.find((c: { code: string }) => c.code === "GB");
     expect(gb).toBeDefined();
     expect(gb.currency).toBe("GBP");
+  });
+
+  it("GET /api/onboarding/countries — DK entry has correct bank_format and regulatory_framework", async () => {
+    const res = await request(app).get("/api/onboarding/countries");
+    expect(res.status).toBe(200);
+    const dk = res.body.find((c: { code: string }) => c.code === "DK");
+    expect(dk).toBeDefined();
+    expect(dk.currency).toBe("DKK");
+    // bank_format must NOT be the regulatory body name (prior bug: "Finanstilsynet")
+    expect(dk.bank_format).not.toBe("Finanstilsynet");
+    expect(dk.bank_format).toContain("IBAN");
+    expect(dk.regulatory_framework).toBeDefined();
+    expect(dk.regulatory_framework).toContain("Finanstilsynet");
   });
 
   it("GET /api/onboarding/question-tree — returns full branching tree from JSON file", async () => {

@@ -208,7 +208,7 @@ The onboarding step engine is driven entirely from `docs/onboarding/question-tre
 ## Testing
 
 ```bash
-# Run all integration tests (27 tests: auth + payments + onboarding)
+# Run all integration tests (28 tests: auth + payments + onboarding)
 pnpm --filter @workspace/api-server run test
 ```
 
@@ -242,7 +242,7 @@ See [`docs/architecture/mobile-plan.md`](docs/architecture/mobile-plan.md) for t
 | `docs/research/` | Public observations of SumUp web/iOS/Android |
 | `docs/onboarding/question-tree.json` | Machine-readable branching question tree (runtime SOT) |
 | `docs/onboarding/onboarding-master-map.md` | Full onboarding flow with all branches |
-| `docs/onboarding/country-language-matrix.csv` | 27 countries, languages, ID types, banking formats |
+| `docs/onboarding/country-language-matrix.csv` | 26 countries, languages, ID types, banking formats |
 | `docs/architecture/` | System diagrams and service topology |
 
 ---
