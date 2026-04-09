@@ -184,4 +184,35 @@ describe("Onboarding routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.next_question?.id).toBe("q_personal_name");
   });
+
+  // ── 422 Required-fields validation ──────────────────────────────────────
+
+  it("POST /api/onboarding/session/step — 422 when required field missing (country step)", async () => {
+    const freshToken = await registerAndGetToken();
+    await setupSession(freshToken);
+
+    const res = await request(app)
+      .post("/api/onboarding/session/step")
+      .set("Authorization", `Bearer ${freshToken}`)
+      .send({ step_id: "q_country", answer: {} });
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe("ValidationError");
+    expect(Array.isArray(res.body.missing_fields)).toBe(true);
+    expect(res.body.missing_fields).toContain("country");
+  });
+
+  it("POST /api/onboarding/session/step — 422 when answer key present but value empty", async () => {
+    const freshToken = await registerAndGetToken();
+    await setupSession(freshToken);
+
+    const res = await request(app)
+      .post("/api/onboarding/session/step")
+      .set("Authorization", `Bearer ${freshToken}`)
+      .send({ step_id: "q_country", answer: { country: "" } });
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe("ValidationError");
+    expect(res.body.missing_fields).toContain("country");
+  });
 });

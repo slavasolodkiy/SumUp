@@ -1,0 +1,62 @@
+You are continuing work in https://github.com/slavasolodkiy/SumUp.
+
+Goal:
+Ship v1.2 that is truthful, CI-backed, and cross-platform enough for local analysis.
+
+Critical context:
+- Latest commits added onboarding integrity, seed, Dockerfiles.
+- BUT final commit removed CI workflow.
+- Docs still contain contradictory claims (mobile implemented, CI exists, etc.).
+- Windows local verification currently breaks due shell/rollup config.
+
+Tasks (do in order):
+
+Phase 1 — Restore truth in docs
+1) Update docs/progress-log.md:
+- remove stale claims that mobile app is implemented.
+- keep only factual, currently present artifacts.
+2) Update docs/architecture/architecture-diagram.md:
+- reflect actual modular-monolith architecture (not separate deployed microservices).
+- explicitly mark mobile as deferred.
+3) Keep README/replit.md consistent with current state and test counts.
+
+Phase 2 — Restore CI (must persist)
+1) Re-add `.github/workflows/ci.yml` and ensure it is committed in final HEAD.
+2) CI jobs:
+- install
+- typecheck
+- api tests
+- api build
+- web build (if intended)
+3) Add a guard in docs/progress-log to prevent claiming CI unless file exists.
+
+Phase 3 — Cross-platform reliability
+1) Replace root `preinstall` command that uses `sh` with a Node-based script (works on Linux/macOS/Windows).
+2) Fix rollup optional dependency strategy:
+- do not exclude win32 rollup binaries if local Windows validation is expected,
+- or implement explicit “Linux-only” guard + separate reproducible local command set.
+3) Ensure these commands work after clean install:
+- pnpm install
+- pnpm run typecheck
+- pnpm --filter @workspace/api-server run test
+- pnpm run build (or clearly split supported build targets).
+
+Phase 4 — Onboarding/data polish
+1) Keep tree-driven engine.
+2) Add tests for 422 required-fields behavior.
+3) Fix country metadata inconsistencies (example: DK bank_format value).
+4) Ensure README endpoint contracts match actual API paths and behavior.
+
+Definition of done:
+1) `.github/workflows/ci.yml` exists in HEAD and is referenced correctly.
+2) No contradictory docs about mobile/CI.
+3) Fresh install and core commands pass in documented environment(s).
+4) Provide final report with:
+- exact commands run + outputs
+- files changed
+- what remains deferred (explicitly).
+
+Commit style:
+- small commits per phase
+- push after each phase
+- final summary comment in docs/progress-log with verifiable evidence only.

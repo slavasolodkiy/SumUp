@@ -46,8 +46,10 @@ A comprehensive SumUp-inspired multi-platform payments reference system built as
 ### Prerequisites
 
 - Node.js 20+
-- pnpm 9+
+- pnpm 10+
 - PostgreSQL 15+ (or Docker — see below)
+
+> **Platform note:** The workspace is configured for **Linux x64 only**. Binary overrides in `pnpm-workspace.yaml` exclude all non-Linux rollup, esbuild, lightningcss, and tailwindcss-oxide natives. On Windows, use WSL2 or Docker. On macOS, remove the relevant overrides before installing.
 
 ### 1. Clone & install
 
@@ -206,7 +208,7 @@ The onboarding step engine is driven entirely from `docs/onboarding/question-tre
 ## Testing
 
 ```bash
-# Run all integration tests (21 tests: auth + payments + onboarding)
+# Run all integration tests (27 tests: auth + payments + onboarding)
 pnpm --filter @workspace/api-server run test
 ```
 
@@ -219,9 +221,10 @@ Tests run against the live `DATABASE_URL`. CI runs the same suite with a dedicat
 GitHub Actions workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 Runs on every push and PR to `main`:
-1. TypeScript typecheck
+1. TypeScript typecheck (all packages)
 2. API integration tests (with Postgres service)
-3. Full build
+3. API server build
+4. Web app build (with `BASE_PATH=/` placeholder)
 
 ---
 

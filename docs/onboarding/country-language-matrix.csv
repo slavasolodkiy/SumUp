@@ -9,7 +9,7 @@ BE,Belgium,EUR,"fr,nl","fr,nl,en",passport|national_id|driving_licence,IBAN+BIC,
 NL,Netherlands,EUR,nl,"nl,en",passport|national_id|driving_licence,IBAN+BIC,Yes,(HYPOTHESIS),DNB / EU 5AMLD,
 CH,Switzerland,CHF,de,"de,fr,it,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),FINMA,Not EU — separate regulatory framework
 SE,Sweden,SEK,sv,"sv,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),Finansinspektionen / EU 5AMLD,
-DK,Denmark,DKK,da,"da,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),Finanstilsynet / EU 5AMLD,
+DK,Denmark,DKK,da,"da,en",passport|national_id|driving_licence,IBAN+BIC|Reg+Kontonummer (local) (HYPOTHESIS),No,(HYPOTHESIS),Finanstilsynet / EU 5AMLD,
 NO,Norway,NOK,nb,"nb,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),Finanstilsynet NO / EU equivalent,Not EU member; EEA
 FI,Finland,EUR,fi,"fi,sv,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),FIN-FSA / EU 5AMLD,Finnish listing page confirms availability
 PL,Poland,PLN,pl,"pl,en",passport|national_id|driving_licence,IBAN+BIC,No,(HYPOTHESIS),KNF / EU 5AMLD,
