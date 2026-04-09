@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+RUN npm install -g pnpm
+
+WORKDIR /workspace
+
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY tsconfig.base.json ./
+
+COPY lib/ lib/
+COPY artifacts/web-app/ artifacts/web-app/
+
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /workspace/artifacts/web-app
+
+EXPOSE 5173
+
+CMD ["pnpm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -38,7 +38,7 @@ A comprehensive SumUp-inspired multi-platform payments reference system built as
 | `lib/api-spec` | OpenAPI 3 specification |
 | `lib/api-zod` | Zod validators generated from OpenAPI |
 | `lib/api-client-react` | React Query hooks generated from OpenAPI |
-| `lib/db` | Drizzle ORM schema + migrations |
+| `lib/db` | Drizzle ORM schema (schema-push workflow, no migration files) |
 | `docs/` | Research, architecture, onboarding docs |
 
 ## Quick Start (Local)
@@ -47,7 +47,7 @@ A comprehensive SumUp-inspired multi-platform payments reference system built as
 
 - Node.js 20+
 - pnpm 9+
-- PostgreSQL 15+ (or Docker)
+- PostgreSQL 15+ (or Docker — see below)
 
 ### 1. Clone & install
 
@@ -64,16 +64,17 @@ cp .env.example .env
 # Edit .env — set DATABASE_URL and SESSION_SECRET
 ```
 
-### 3. Run database migrations
+### 3. Push database schema
 
 ```bash
-pnpm --filter @workspace/db run migrate
+# This project uses drizzle-kit schema-push (not migration files).
+pnpm --filter @workspace/db run push
 ```
 
 ### 4. Seed demo data (optional)
 
 ```bash
-pnpm --filter scripts run seed
+pnpm --filter @workspace/scripts run seed
 ```
 
 This creates:
@@ -84,22 +85,30 @@ This creates:
 
 ```bash
 # In two separate terminals:
-pnpm --filter @workspace/api-server run dev   # API on port from $PORT
-pnpm --filter @workspace/web-app run dev       # Web on port from $PORT
+pnpm --filter @workspace/api-server run dev   # API
+pnpm --filter @workspace/web-app run dev       # Web
 ```
 
 ---
 
-## Docker Compose (local development only)
+## Docker Compose (local development)
+
+> **Note:** This requires Docker Desktop / Docker Engine. The Replit hosted environment does not have a Docker daemon and cannot run `docker compose up`. The `docker-compose.yml` is provided for local developer setup only.
 
 ```bash
-docker-compose up
+# Validate the compose file
+docker compose config
+
+# Start all services (builds Dockerfiles on first run)
+docker compose up --build
 ```
 
-Services started:
-- `db` — PostgreSQL 15
+Services:
+- `db` — PostgreSQL 15 (port 5432)
 - `api` — API server (port 4000)
 - `web` — Vite dev server (port 5173)
+
+First run runs `drizzle-kit push` automatically and seeds demo data.
 
 ---
 
@@ -109,7 +118,7 @@ Services started:
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
 | `SESSION_SECRET` | Yes (prod) | 32-byte hex secret for JWT signing. Generate: `openssl rand -hex 32` |
-| `PORT` | Yes | Port for each service (set by Replit) |
+| `PORT` | Yes | Port for each service (set automatically by Replit) |
 | `NODE_ENV` | No | `development` / `production` / `test` |
 
 > **Security:** In production the server will **crash on startup** if `SESSION_SECRET` is not set.
@@ -128,6 +137,14 @@ Full OpenAPI spec: [`lib/api-spec/openapi.yaml`](lib/api-spec/openapi.yaml)
 | POST | `/api/auth/login` | Login → tokens |
 | POST | `/api/auth/refresh` | Rotate refresh token |
 | POST | `/api/auth/logout` | Invalidate refresh token |
+
+### Merchants
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/merchants/me` | Get merchant profile |
+| PUT | `/api/merchants/me` | Update profile |
+| GET | `/api/merchants/me/summary` | Revenue stats |
 
 ### Payments
 
@@ -156,19 +173,29 @@ Full OpenAPI spec: [`lib/api-spec/openapi.yaml`](lib/api-spec/openapi.yaml)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/onboarding/start` | Start onboarding session |
+| POST | `/api/onboarding/session` | Start onboarding session |
 | GET | `/api/onboarding/session` | Get current session |
-| POST | `/api/onboarding/step` | Submit step answer |
-| POST | `/api/onboarding/kyc/verify` | Submit KYC document |
+| POST | `/api/onboarding/session/step` | Submit step answer (`step_id` must equal current step — 409 if out of order) |
+| POST | `/api/onboarding/session/kyc/verify` | Submit KYC document |
 | GET | `/api/onboarding/countries` | Supported countries |
-| GET | `/api/onboarding/question-tree` | Full question tree (SOT) |
+| GET | `/api/onboarding/question-tree` | Full question tree (loaded from `docs/onboarding/question-tree.json`) |
+
+---
+
+## Onboarding Engine
+
+The onboarding step engine is driven entirely from `docs/onboarding/question-tree.json`:
+
+- Each node defines its `next` rules (conditional on answer values)
+- `POST /api/onboarding/session/step` enforces that `step_id` equals `session.current_step` — submitting out-of-order returns **409 Conflict**
+- Next step is computed by evaluating the node's `next` map against the submitted answer
 
 ---
 
 ## Security
 
-- JWT access tokens (1 hour expiry), refresh tokens (30 days) stored in DB
-- Refresh token rotation: old token invalidated on every use
+- JWT access tokens (1 hour) with unique `jti` per token
+- Refresh tokens (30 days) stored in DB — validated on rotation; reuse after rotation returns 401
 - Auth endpoints rate-limited: 20 requests / 15 min per IP
 - Passwords hashed with bcrypt (cost factor 12)
 - `SESSION_SECRET` required in production (startup crash guard)
@@ -176,9 +203,31 @@ Full OpenAPI spec: [`lib/api-spec/openapi.yaml`](lib/api-spec/openapi.yaml)
 
 ---
 
+## Testing
+
+```bash
+# Run all integration tests (21 tests: auth + payments + onboarding)
+pnpm --filter @workspace/api-server run test
+```
+
+Tests run against the live `DATABASE_URL`. CI runs the same suite with a dedicated Postgres service container.
+
+---
+
+## CI
+
+GitHub Actions workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+Runs on every push and PR to `main`:
+1. TypeScript typecheck
+2. API integration tests (with Postgres service)
+3. Full build
+
+---
+
 ## Mobile App
 
-The Expo mobile app is **not yet implemented** — planned as Phase F.
+The Expo mobile app is **not yet implemented** — planned as a future phase.
 See [`docs/architecture/mobile-plan.md`](docs/architecture/mobile-plan.md) for the intended design.
 
 ---
@@ -188,18 +237,10 @@ See [`docs/architecture/mobile-plan.md`](docs/architecture/mobile-plan.md) for t
 | Document | Description |
 |----------|-------------|
 | `docs/research/` | Public observations of SumUp web/iOS/Android |
+| `docs/onboarding/question-tree.json` | Machine-readable branching question tree (runtime SOT) |
 | `docs/onboarding/onboarding-master-map.md` | Full onboarding flow with all branches |
-| `docs/onboarding/question-tree.json` | Machine-readable branching question tree (SOT) |
 | `docs/onboarding/country-language-matrix.csv` | 27 countries, languages, ID types, banking formats |
 | `docs/architecture/` | System diagrams and service topology |
-
----
-
-## Testing
-
-```bash
-pnpm --filter @workspace/api-server run test
-```
 
 ---
 

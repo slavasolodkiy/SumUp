@@ -92,3 +92,12 @@
 - [2026-04-09] Phase D — Auth hardening: JWT `jti` for uniqueness; refresh token validated against DB-stored copy; token rotation attack prevention (reuse returns 401); auth rate limiter (20 req/15min, skipped in test); body size limit 1MB; `SESSION_SECRET` startup crash guard in production
 - [2026-04-09] Phase E — Vitest integration tests: 21 tests across auth/payments/onboarding suites. CI YAML at .github/workflows/ci.yml. All 21 tests pass.
 - [2026-04-09] Phase F — Mobile app explicitly deferred (NOT IMPLEMENTED). Design doc at docs/architecture/mobile-plan.md.
+
+### Phase v1.1: Truth-Gap Closure ✅
+
+- [2026-04-09] Phase 1 — Docs/Reality Alignment: README fixed (migrate→push, seed commands, docker note, CI reference, onboarding paths, build constraints)
+- [2026-04-09] Phase 2 — Dev UX: `lib/db` gained `migrate` alias for `drizzle-kit push`; real `seed` script in `scripts/src/seed.ts` (idempotent, creates 1 merchant + 5 products + 30 transactions + 3 payouts)
+- [2026-04-09] Phase 3 — Docker Compose: `artifacts/api-server/Dockerfile.dev` + `artifacts/web-app/Dockerfile.dev` created; `docker compose config` validates cleanly; `version:` obsolete field removed
+- [2026-04-09] Phase 4 — CI Restored: `.github/workflows/ci.yml` re-added (install + typecheck + test with Postgres service + api-server build); frontend build noted as Replit-deploy-time only
+- [2026-04-09] Phase 5 — Onboarding Integrity: Step engine replaced with tree-based resolver from question-tree.json; `step_id !== current_step` → 409 StepConflict enforced; required field validation (422 on missing fields); 8 tests covering out-of-order, re-submit, skip-ahead, individual/company/sole_trader branch divergence
+- [2026-04-09] Phase 6 — Verification: typecheck ✅ (4/4 clean), tests ✅ (25/25), api-server build ✅, docker compose config ✅, seed ✅

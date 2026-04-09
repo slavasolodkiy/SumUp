@@ -1,7 +1,10 @@
-version: "3.9"
-
 # Local development only — NOT for production.
-# Creates a Postgres database and starts both services.
+# Requires Docker Engine or Docker Desktop.
+# Not usable in the Replit hosted environment (no Docker daemon).
+#
+# Usage:
+#   docker compose up --build   # first run — builds images + starts services
+#   docker compose up           # subsequent runs
 
 services:
   db:
@@ -36,9 +39,14 @@ services:
       SESSION_SECRET: dev-docker-secret-do-not-use-in-production
     ports:
       - "4000:4000"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
+    command: >
+      sh -c "
+        cd /workspace &&
+        pnpm --filter @workspace/db run push &&
+        pnpm --filter @workspace/scripts run seed &&
+        cd /workspace/artifacts/api-server &&
+        pnpm run dev
+      "
 
   web:
     build:
@@ -50,12 +58,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: "5173"
-      VITE_API_URL: http://localhost:4000
     ports:
       - "5173:5173"
-    volumes:
-      - .:/workspace
-      - /workspace/node_modules
 
 volumes:
   pgdata:

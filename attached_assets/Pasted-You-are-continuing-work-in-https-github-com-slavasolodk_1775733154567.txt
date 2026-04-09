@@ -1,0 +1,68 @@
+You are continuing work in https://github.com/slavasolodkiy/SumUp.
+
+Goal:
+Close the “truth gap” and ship a reproducible v1.1 that is runnable, testable, and internally consistent.
+
+Known issues to fix (must address all):
+1) README claims commands/scripts that do not exist (`migrate`, `seed`).
+2) docker-compose references missing Dockerfiles.
+3) CI workflow was removed but docs still claim CI exists.
+4) Onboarding runtime logic is still hardcoded and does not enforce step integrity.
+5) Docs still contain contradictory “completed” claims.
+
+Work plan:
+
+Phase 1 — Docs/Reality Alignment
+- Update README.md, replit.md, docs/progress-log.md:
+  - only claim what is actually implemented.
+  - fix onboarding endpoint docs to real paths.
+  - if mobile is deferred, keep that explicit everywhere.
+- Remove stale claims.
+
+Phase 2 — Dev UX and Reproducibility
+- Implement missing scripts:
+  - `lib/db`: add `migrate` script (or rename docs to `push` if migrationless by design).
+  - `scripts`: add real `seed` script creating demo merchant/products/transactions.
+- Make README quickstart executable end-to-end.
+
+Phase 3 — Docker Compose actually works
+- Add `artifacts/api-server/Dockerfile.dev` and `artifacts/web-app/Dockerfile.dev` (or refactor compose to avoid missing Dockerfiles).
+- Verify:
+  - `docker compose config`
+  - `docker compose up --build` starts db/api/web successfully.
+
+Phase 4 — Restore CI
+- Re-add `.github/workflows/ci.yml` with:
+  - install
+  - typecheck
+  - api tests
+  - build
+- Ensure docs reference CI accurately.
+
+Phase 5 — Onboarding Engine Integrity
+- Make onboarding flow driven from one source of truth:
+  - `docs/onboarding/question-tree.json` parsed into runtime engine.
+- Enforce:
+  - submitted `step_id` must equal session `current_step`, else 409.
+  - next step must follow tree branch from previous answer.
+  - required fields for each step validated before advancing.
+- Add tests for out-of-order step submission and branch violations.
+
+Phase 6 — Final Verification
+Run and include outputs:
+- pnpm run typecheck
+- pnpm --filter @workspace/api-server run test
+- pnpm run build
+- docker compose config
+- docker compose up --build (or explain environment limitation)
+
+Delivery format:
+1) Summary of implemented vs deferred.
+2) Exact file list changed.
+3) Command outputs with pass/fail.
+4) Remaining top 10 prioritized tasks.
+
+Constraints:
+- Keep legal-safe boundaries (public sources only, no reverse engineering).
+- Do not claim completion without file + command evidence.
+- Commit in small, clear commits and push after each phase.

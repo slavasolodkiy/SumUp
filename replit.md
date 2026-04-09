@@ -113,11 +113,14 @@ NOT YET IMPLEMENTED. See `docs/architecture/mobile-plan.md` for planned Expo des
 
 ## Key Commands
 
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-server run test` — run 21 integration tests
+- `pnpm run typecheck` — full typecheck across all packages (4/4 clean)
+- `pnpm --filter @workspace/api-server run build` — build API server (web-app builds at Replit deploy time)
+- `pnpm --filter @workspace/api-server run test` — run 25 integration tests (auth + payments + onboarding)
+- `pnpm --filter @workspace/scripts run seed` — seed demo data (idempotent — skips if demo@payos.com exists)
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `pnpm --filter @workspace/db run push` — push DB schema changes (also aliased as `migrate`)
+- `pnpm --filter @workspace/db run migrate` — alias for `push` (drizzle-kit schema-push, no migration files)
+- `docker compose config` — validate docker-compose.yml (requires Docker Engine, not available in Replit hosted env)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
